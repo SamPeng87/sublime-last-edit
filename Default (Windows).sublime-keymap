@@ -1,0 +1,5 @@
+[
+    {
+        "keys": ["ctrl+."], "command": "last_edit"  
+    }
+]
