@@ -26,17 +26,21 @@ Sublime Package Manager will be added soon as installation method, by now checko
 
 # Usage
 
-Wherever you are you can use the default key binding for MacOs
+##Wherever you are you can use the default key binding for MacOs
 
 command+. (jump for last edit point)
+
 ctrl+[ (jump for last edited view by left)
+
 ctrl+] (jump for last edited view by right)
 
 
-Other operating systems(Windows,linux)
+##Other operating systems(Windows,linux)
 
 control+.
+
 ctrl+[ (jump for last edited view by left)
+
 ctrl+] (jump for last edited view by right)
 
 # Thanks
