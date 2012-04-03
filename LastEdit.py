@@ -18,42 +18,56 @@ class LastEditCommand(sublime_plugin.TextCommand):
 
         RecordIntputRegion.lastLine[lastViewPosKey].insert(0,lastViewLine)
         lastViewCol = RecordIntputRegion.editLine[lastView][lastViewLine]
-
-        lastViewObj=None
-        for window in sublime.windows():
-            for view in window.views():
-                if lastView == view.id():
-                    lastViewObj = view
-                    lastWindow  = window
-                    pass
-        lastGroup,_ = lastWindow.get_view_index(lastViewObj)
-        lastWindow.focus_group(lastGroup) 
-
-        lastWindow.focus_view(lastViewObj);
-
-        pt = lastViewObj.text_point(lastViewLine,lastViewCol);
-
-        lastViewObj.sel().clear();
-
-        lastViewObj.sel().add(sublime.Region(pt));
-
-        lastViewObj.show(pt);
+        jumpLastPoint(jumpLastView(lastView),lastViewLine,lastViewCol)
 
 
-        # pt=self.view.text_point(10,10);
-        # self.view.sel().clear();
-        # self.view.sel().add(sublime.Region(pt));
+class SwitchEditViewCommand(sublime_plugin.TextCommand):
+    def run(self, edit,way="left"):
 
-        # self.view.show(pt);
+        if way == "left":
+            lastView = RecordIntputRegion.editView.pop();
+            RecordIntputRegion.editView.insert(0,lastView);
+            if lastView == self.view.id():
+                lastView = RecordIntputRegion.editView.pop();
+                RecordIntputRegion.editView.insert(0,lastView);
+        else:
+            lastView = RecordIntputRegion.editView.pop(0);
+            RecordIntputRegion.editView.append(lastView);
+            if lastView == self.view.id():
+                lastView = RecordIntputRegion.editView.pop(0);
+                RecordIntputRegion.editView.append(lastView);
 
-        # //sublime.error_message(str(lastEdit['file']));
+        jumpLastView(lastView)
 
+def jumpLastView(lastView):
+    lastViewObj=None
+    for window in sublime.windows():
+        for view in window.views():
+            if lastView == view.id():
+                lastViewObj = view
+                lastWindow  = window
+                pass
+    lastGroup,_ = lastWindow.get_view_index(lastViewObj)
+    lastWindow.focus_group(lastGroup) 
+
+    lastWindow.focus_view(lastViewObj)
+
+    return lastViewObj
+
+def jumpLastPoint(lastViewObj,lastViewLine,lastViewCol):
+    pt = lastViewObj.text_point(lastViewLine,lastViewCol);
+    lastViewObj.sel().clear();
+
+    lastViewObj.sel().add(sublime.Region(pt));
+
+    lastViewObj.show(pt);
 
 
 class RecordIntputRegion(sublime_plugin.EventListener):
     editLine =   {}
     lastLine =   {}
     lastView = []
+    editView = []
 
     def on_modified(self, view):
         sel = view.sel()[0]
@@ -65,11 +79,13 @@ class RecordIntputRegion(sublime_plugin.EventListener):
 
         if lastViewPos == -1:
             RecordIntputRegion.lastView.append(curr_view)
+            RecordIntputRegion.editView.append(curr_view)
             lastViewPos += 1
             pass
-        
+
         if not RecordIntputRegion.lastView[lastViewPos] is curr_view:
             RecordIntputRegion.lastView.append(curr_view)
+            RecordIntputRegion.editView.append(curr_view)
             lastViewPos += 1
 
         viewPosKey = str(curr_view)+":"+str(lastViewPos)
@@ -92,3 +108,4 @@ class RecordIntputRegion(sublime_plugin.EventListener):
             RecordIntputRegion.editLine[curr_view]={}
             pass
         RecordIntputRegion.editLine[curr_view][last_line] = last_col
+

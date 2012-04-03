@@ -11,7 +11,10 @@ this is my first plugin ,if have some bug,please post issues.
 Next fearture:
 
 * Sort view buffer by edit count
-* only jump last edit view buffer
+
+    wait Sublime provide tab fold api，otherwise no have any purport
+
+* only jump last edit view buffer **[DONE]**
 * if have some window edit point,will jump for it.now,LastEdit can't good work for this.I will change it
 
 # Install & Config
