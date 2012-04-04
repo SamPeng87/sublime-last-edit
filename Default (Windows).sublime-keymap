@@ -1,5 +1,13 @@
 [
     {
         "keys": ["ctrl+."], "command": "last_edit"  
+    },
+    {
+        "keys": ["ctrl+["],"command":"switch_edit_view",
+        "args":{"way":"left"}
+    },
+    {
+        "keys": ["ctrl+]"],"command":"switch_edit_view",
+        "args":{"way":"right"}
     }
 ]
