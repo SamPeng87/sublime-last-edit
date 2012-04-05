@@ -15,8 +15,6 @@ class LastEditCommand(sublime_plugin.TextCommand):
         jumpLastPoint(jumpLastView(lastView),lastViewLine,lastViewCol)
 class SwitchEditViewCommand(sublime_plugin.TextCommand):
     def run(self, edit,way="left"):
-        sublime.error_message(str(RecordIntputRegion.editView))
-
         if way == "left":
             lastView = RecordIntputRegion.editView.pop();
             RecordIntputRegion.editView.insert(0,lastView);
@@ -29,7 +27,6 @@ class SwitchEditViewCommand(sublime_plugin.TextCommand):
             if lastView == self.view.id():
                 lastView = RecordIntputRegion.editView.pop(0);
                 RecordIntputRegion.editView.append(lastView);
-        sublime.error_message(str(lastView))
         jumpLastView(lastView)
 
 def jumpLastView(lastView):
