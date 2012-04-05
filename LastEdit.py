@@ -2,27 +2,20 @@ import sublime, sublime_plugin
 
 class LastEditCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        viewsCount = len(RecordIntputRegion.lastView)-1;
 
+        lastView,lastViewLine = getLastEditLine()
+        
+        # sel = self.view.sel()[0]
+        # curr_line,_ = self.view.rowcol(sel.begin())
 
-        lastView = RecordIntputRegion.lastView[viewsCount];
-        lastViewPosKey = str(lastView)+":"+str(viewsCount);
-        if len(RecordIntputRegion.lastLine[lastViewPosKey]) >0:
-            lastViewLine = RecordIntputRegion.lastLine[lastViewPosKey].pop()
-        else:
-            RecordIntputRegion.lastView.pop();
-            viewsCount = len(RecordIntputRegion.lastView)-1;
-            lastView = RecordIntputRegion.lastView[viewsCount];
-            lastViewPosKey = str(lastView)+":"+str(viewsCount);
-            lastViewLine = RecordIntputRegion.lastLine[lastViewPosKey].pop()
+        # if curr_line == lastViewLine and self.view.id() == lastView:
+        #     lastView,lastViewLine = getLastEditLine()
 
-        RecordIntputRegion.lastLine[lastViewPosKey].insert(0,lastViewLine)
         lastViewCol = RecordIntputRegion.editLine[lastView][lastViewLine]
         jumpLastPoint(jumpLastView(lastView),lastViewLine,lastViewCol)
-
-
 class SwitchEditViewCommand(sublime_plugin.TextCommand):
     def run(self, edit,way="left"):
+        sublime.error_message(str(RecordIntputRegion.editView))
 
         if way == "left":
             lastView = RecordIntputRegion.editView.pop();
@@ -36,7 +29,7 @@ class SwitchEditViewCommand(sublime_plugin.TextCommand):
             if lastView == self.view.id():
                 lastView = RecordIntputRegion.editView.pop(0);
                 RecordIntputRegion.editView.append(lastView);
-
+        sublime.error_message(str(lastView))
         jumpLastView(lastView)
 
 def jumpLastView(lastView):
@@ -62,6 +55,17 @@ def jumpLastPoint(lastViewObj,lastViewLine,lastViewCol):
 
     lastViewObj.show(pt);
 
+def getLastEditLine():
+    viewsCount = len(RecordIntputRegion.lastView)-1;
+    lastView = RecordIntputRegion.lastView[viewsCount];
+    lastViewPosKey = str(lastView)+":"+str(viewsCount);
+    if len(RecordIntputRegion.lastLine[lastViewPosKey]) == 0:
+        RecordIntputRegion.lastView.pop();
+        viewsCount = len(RecordIntputRegion.lastView)-1;
+        lastView = RecordIntputRegion.lastView[viewsCount];
+        lastViewPosKey = str(lastView)+":"+str(viewsCount);
+    lastViewLine = RecordIntputRegion.lastLine[lastViewPosKey].pop()
+    return lastView,lastViewLine
 
 class RecordIntputRegion(sublime_plugin.EventListener):
     editLine =   {}
@@ -76,17 +80,24 @@ class RecordIntputRegion(sublime_plugin.EventListener):
         curr_window = view.window().id()
         last_line,last_col = view.rowcol(sel.begin())
         lastViewPos = len(RecordIntputRegion.lastView)-1
+        lastSwitchViewPos = len(RecordIntputRegion.editView)-1
 
         if lastViewPos == -1:
             RecordIntputRegion.lastView.append(curr_view)
-            RecordIntputRegion.editView.append(curr_view)
             lastViewPos += 1
             pass
 
         if not RecordIntputRegion.lastView[lastViewPos] is curr_view:
             RecordIntputRegion.lastView.append(curr_view)
-            RecordIntputRegion.editView.append(curr_view)
             lastViewPos += 1
+        if lastSwitchViewPos == -1:
+            RecordIntputRegion.editView.append(curr_view)
+            lastSwitchViewPos += 1
+            pass
+
+        if not RecordIntputRegion.editView[lastSwitchViewPos] is curr_view:
+            RecordIntputRegion.editView.append(curr_view)
+
 
         viewPosKey = str(curr_view)+":"+str(lastViewPos)
         if not RecordIntputRegion.lastLine.has_key(viewPosKey):
