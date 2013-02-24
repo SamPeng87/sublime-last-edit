@@ -10,9 +10,11 @@ class LastEditCommand(sublime_plugin.TextCommand):
 
         # if curr_line == lastViewLine and self.view.id() == lastView:
         #     lastView,lastViewLine = getLastEditLine()
+        if lastView:
+            lastViewCol = RecordIntputRegion.editLine[lastView][lastViewLine]
+            jumpLastPoint(jumpLastView(lastView), lastViewLine, lastViewCol)
 
-        lastViewCol = RecordIntputRegion.editLine[lastView][lastViewLine]
-        jumpLastPoint(jumpLastView(lastView),lastViewLine,lastViewCol)
+
 class SwitchEditViewCommand(sublime_plugin.TextCommand):
     def run(self, edit,way="left"):
         if way == "left":
@@ -31,16 +33,18 @@ class SwitchEditViewCommand(sublime_plugin.TextCommand):
 
 def jumpLastView(lastView):
     lastViewObj=None
+    lastWindow = None
     for window in sublime.windows():
         for view in window.views():
             if lastView == view.id():
                 lastViewObj = view
                 lastWindow  = window
                 pass
-    lastGroup,_ = lastWindow.get_view_index(lastViewObj)
-    lastWindow.focus_group(lastGroup) 
+    if lastWindow:
+        lastGroup, _ = lastWindow.get_view_index(lastViewObj)
+        lastWindow.focus_group(lastGroup)
 
-    lastWindow.focus_view(lastViewObj)
+        lastWindow.focus_view(lastViewObj)
 
     return lastViewObj
 
@@ -53,16 +57,21 @@ def jumpLastPoint(lastViewObj,lastViewLine,lastViewCol):
     lastViewObj.show(pt);
 
 def getLastEditLine():
-    viewsCount = len(RecordIntputRegion.lastView)-1;
-    lastView = RecordIntputRegion.lastView[viewsCount];
-    lastViewPosKey = str(lastView)+":"+str(viewsCount);
-    if len(RecordIntputRegion.lastLine[lastViewPosKey]) == 0:
-        RecordIntputRegion.lastView.pop();
-        viewsCount = len(RecordIntputRegion.lastView)-1;
-        lastView = RecordIntputRegion.lastView[viewsCount];
-        lastViewPosKey = str(lastView)+":"+str(viewsCount);
-    lastViewLine = RecordIntputRegion.lastLine[lastViewPosKey].pop()
-    return lastView,lastViewLine
+    lastView = None
+    lastViewLine = None
+    lastViewLen = len(RecordIntputRegion.lastView)
+    if lastViewLen > 0:
+        viewsCount = lastViewLen - 1
+        lastView = RecordIntputRegion.lastView[viewsCount]
+        lastViewPosKey = str(lastView) + ":" + str(viewsCount)
+        if len(RecordIntputRegion.lastLine[lastViewPosKey]) == 0:
+            RecordIntputRegion.lastView.pop()
+            viewsCount = lastViewLen - 1
+            lastView = RecordIntputRegion.lastView[viewsCount]
+            lastViewPosKey = str(lastView) + ":" + str(viewsCount)
+        lastViewLine = RecordIntputRegion.lastLine[lastViewPosKey].pop()
+    return lastView, lastViewLine
+
 
 class RecordIntputRegion(sublime_plugin.EventListener):
     editLine =   {}
